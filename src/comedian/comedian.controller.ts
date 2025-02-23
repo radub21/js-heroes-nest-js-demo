@@ -7,10 +7,10 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ComedianDto } from '../dto/comedian/comedian.dto';
-import { CreateComedianDto } from '../dto/comedian/create-comedian.dto';
-import { UpdateComedianDto } from '../dto/comedian/update-comedian.dto';
 import { ComedianService } from './comedian.service';
+import { ComedianDto } from './dto/comedian.dto';
+import { CreateComedianDto } from './dto/create-comedian.dto';
+import { UpdateComedianDto } from './dto/update-comedian.dto';
 
 @Controller('comedian')
 export class ComedianController {
