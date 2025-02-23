@@ -16,11 +16,9 @@ import { UpdateComedianDto } from './dto/update-comedian.dto';
 export class ComedianController {
   constructor(private readonly comedianService: ComedianService) {}
 
-  @Get('/:id')
-  public async getComedianById(
-    @Param('id') id: string,
-  ): Promise<ComedianDto | null> {
-    return await this.comedianService.getComedianById(id);
+  @Post()
+  public async createComedian(@Body() newComedian: CreateComedianDto) {
+    await this.comedianService.createComedian(newComedian);
   }
 
   @Get()
@@ -28,9 +26,11 @@ export class ComedianController {
     return await this.comedianService.getAllComedians();
   }
 
-  @Post()
-  public async createComedian(@Body() newComedian: CreateComedianDto) {
-    await this.comedianService.createComedian(newComedian);
+  @Get('/:id')
+  public async getComedianById(
+    @Param('id') id: string,
+  ): Promise<ComedianDto | null> {
+    return await this.comedianService.getComedianById(id);
   }
 
   @Patch(':id')
