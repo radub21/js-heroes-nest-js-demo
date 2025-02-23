@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { ComedianModule } from './comedian/comedian.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { JokesModule } from './jokes/jokes.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { PrismaModule } from './prisma/prisma.module';
     ConfigModule.forRoot(),
     PrismaModule,
     ComedianModule,
+    JokesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
