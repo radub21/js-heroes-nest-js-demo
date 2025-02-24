@@ -36,6 +36,7 @@ model ShowPerformance {
   id String @id @default(uuid())
   jokeId String
   joke Joke @relation(fields: [jokeId], references: [id])
+  performanceDate DateTime
   comedianId String
   comedian Comedian @relation(fields: [comedianId], references: [id])
 }
