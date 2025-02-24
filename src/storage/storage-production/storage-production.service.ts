@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { StorageService } from '../storage.service';
 
 @Injectable()
-export class StorageProductionService {
+export class StorageProductionService implements StorageService {
   public readFile(path: string) {
     console.log(
       `this method is reading from ${path} in production environment`,

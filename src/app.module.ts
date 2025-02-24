@@ -17,7 +17,7 @@ import { StorageModule } from './storage/storage.module';
     ComedianModule,
     JokesModule,
     ShowPerformanceModule,
-    StorageModule,
+    StorageModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

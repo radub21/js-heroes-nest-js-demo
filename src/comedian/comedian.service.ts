@@ -1,31 +1,21 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Inject, Injectable } from '@nestjs/common';
 import { Comedian } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { StorageLocalService } from '../storage/storage-local/storage-local.service';
-import { StorageProductionService } from '../storage/storage-production/storage-production.service';
+import { STORAGE_SERVICE } from '../storage/storage.module';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class ComedianService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly storageLocalService: StorageLocalService,
-    private readonly storageProductionService: StorageProductionService,
-    private readonly configService: ConfigService<NodeJS.ProcessEnv>,
+    @Inject(STORAGE_SERVICE)
+    private readonly storageService: StorageService,
   ) {}
-
-  private storageService() {
-    if (this.configService.get('NODE_ENV') === 'development') {
-      return this.storageLocalService;
-    }
-
-    return this.storageProductionService;
-  }
 
   public async createComedian(
     payload: Omit<Comedian, 'id' | 'createdAt' | 'updatedAt'>,
   ) {
-    this.storageService().writeFile('test.txt', 'test');
+    this.storageService.writeFile('test.txt', 'test');
     return await this.prismaService.comedian.create({ data: payload });
   }
 
