@@ -1,0 +1,73 @@
+- make sure node js version>=20 is installed - `node -v`
+- install the nest js cli - `npm i -g @nestjs/cli`
+- use the cli, to initialize the project - `nest new . --strict` - strict parameter is used to start the project with the following TS compiler flags enabled: `strictNullChecks`, `noImplicitAny`, `strictBindCallApply`, `forceConsistentCasingInFileNames`, `noFallthroughCasesInSwitch`
+- let's check what we've got in the codebase
+- explain how the dependency injection works with the App Module and the AppService used in AppController
+- let's test the dev environment - `npm run start:dev`
+- encapsulating business logic in modules/verticals - it is crucial to ensure that various parts of the business logic
+- create a standup-comedian library API that has CRUD on: Comedians, Jokes and Shows
+- setup a DB connection using Prisma
+  - initiate Prisma `npx prisma init` - not necessary as we already have it prepared
+  - setup the environment variable for `DATABASE_URL` - already there
+  - setup a ConfigModule so Nest can catch the environment variables
+    - run `npm i --save @nestjs/config`
+    - ConfigModule is a dynamic module that has a `forRoot()` static method which we can call to tell the Config Module to look for the `.env` file at the root of the project.
+    - We'll get the opportunity of defining a Dynamic Module later so let's leave this as it is.
+  - setup the models, show attribute functions and explain how to map relations between models
+  - initial setup of the database
+    - create and apply a migration so the tables corresponding to each of our models are created - `npx prisma migrate dev`
+  - create a Nest Module for handling Prisma
+    - `npm install @prisma/client`
+    - create a prisma module via the cli `nest g module prisma`
+    - extend the PrismaClient class
+    - use Nest lifecycle `onModuleInit` method to create the connection to the database when PrismaModule is initialized
+    - Explain Nest's lifecyle
+      - After the bootstrap function is called, several things happen
+      - For each module, we await the `onModuleInit()` method - called once the host module's dependencies have been resolved
+      - For each module, await for `onApplicationBootstrap()` - called once all modules have been initialized, but before listening for connections
+      - When a termination signal has been received
+      - For each module, the `onModuleDestroy()` method is called
+      - For each module, the `beforeApplicationShutdown()` method is called, after `onModuleDestroy()` handlers have been completed - all existing connections are closed
+      - For each module `onApplicationShutdown()` called after all connections close
+      - Disclaimer without `app.enableShutdownHooks()` promises will not be awaited in the termination events.
+- create a module for Comedian
+  - create a module, controller and service via the cli
+  - CRUD for Comedian
+    - Create
+      - Post endpoint
+      - introduce the DTO concept - we use classes because classes in opposition to types, are not erased at runtime, and they also accept decorators which will prove handy later. - dto's should be created inside the module and should be module specific - so we will place them inside a `/dto` folder - install `@nestjs/mapped-types` to reuse DTO's - use the OmitType - Because birthDate must be a date and we want users to be able to input ISO 8601 standard for encoding dates, we need a `@Transform` decorator that can ensure we have a valid date - introduce the ValidationPipe concept - `app.useGlobalPipes(new ValidationPipe())` - additional libraries for ValidationPipe `npm install class-validator class-transformer`
+      - Easy testing with Swagger interface - One way you can test your endpoints, is by using Postman or other client for api testing. - install swagger plugin `npm install --save @nestjs/swagger` - in the main.ts, create a `generateSwagger` function that leverages the DocumentBuilder class - set a title, description, version and call the `.build()` method - create a documentFactory callback with `SwaggerModule.createDocument()` - then call `SwaggerModule.setup(path, app, documentFactory)` - in the nest-cli.json, add `"plugins": ["@nestjs/swagger"]` under the `compilerOptions` - this will automatically take the dto's defined and used in the controllers and add them to your swagger interface - with Swagger plugin in place, you will want to improve the controllers that you have - note: MappedTypes from `@nestjs/mapped-types` won't be caught by Swagger plugin, so you will have to use it from `@nestjs/swagger` instead
+    - Read - Get resource by id - Get all resources
+    - Patch - use a path parameter to identify the user to update - create an `UpdateComedianDto` class, then leverage from the mapped types `PartialType(CreateComedianDto)`
+    - Delete - use a path parameter to identify the user to delete
+  - create a module for jokes - I have shown you how you can use the cli to generate the files one by one, but what if I told you there is a cli command to generate a CRUD? - `nest g resource jokes` an interactive cli should start asking us what kind of resource we want to create? - we will choose `REST API` as a transport layer - and of course we want to obtain the CRUD endpoints! - now let's see what was generated for us! - a module, injected into app module - a controller, with 5 endpoints for all CRUD operations - a service, with 5 methods already associated with the 5 endpoints - two `dto` files - one for creating a joke and the other one for updating it - an entity file - which in our case I will just delete it, as we already have described the entity using Prisma - the cli did most of the job for us, but here's where my opinion comes in. - you already saw there is no `dto` used to describe the responses of `GET` endpoints from the `jokes.controller` file - which is not necessarily wrong, but without that, the Swagger docs won't be properly documented. - my next step is to create it - now my TS server screams the service methods are not returning the correct type, let's temporarily solve that - next, I'll make sure that `create-joke.dto` is based on `joke.dto` - the last step is to integrate `PrismaService` so we can actually embed the bussines logic inside `jokes.service` - use the DI pattern to bring our `PrismaService` singleton - let's make sure that `PrismaService` is properly referenced in our newly created module - then we'll create the logic to create, read, update and delete - you will notice that inside the service, I won't use `dto's` in type definition. This is again a preference of mine as I believe that the service should not be aware of the `dto's` as long as you use an `entity` model, like Prisma does for us. - let's test the API - what we could optionally do now, is to improve the DTO's with Swagger decorators so users can have better examples - while that's a good practice, I won't do it now, maybe at the end if we have time.
+  - rinse and repeat for the `ShowPerformance`
+  - we now have three verticals properly separated into modules - nice and tidy
+  - but what else can you do with Nest?
+    - remember that I said about ConfigModule that it is a dynamic module? well, why would we want dynamic modules? To answer this question, let us look at the definition of one, then at its injection strategy. We have declared modules, by simply adding a Module decorator then stated its dependencies. We then took the module and in a similar manner, added it to `app.module` configuration. This is telling us that the module is static, with no possibility of configuring it at runtime.
+    - Except `ConfigModule` which has attached to it a `forRoot` static method. In other words, the ConfigModule has in its implementation a `forRoot` static method that does something for us - by default reading values from a `.env` file.
+    - So if we would ever need what we call a `DynamicModule` for one of our static modules, we would have to add to it a static method, that allows it to consume a custom configuration. That static module should return an object that has the interface of the `DynamicModule`. In other words, the dynamic module API simply returns a module, but rather than fix the properties in the `@Module` decorator, we specify them programmatically.
+    - Let's build one for our Comedian Library. Let's presume that our service requires some sort of data storage attached to it. You know, an S3 from AWS or Azure Storage. To keep things simple, let's say that in a local development environment, we want to use a mocked service, while in a production environment, the actual service.
+    - before fiddling with the injection mechanism, let's scaffold our storage logic
+      - `nest g module storage`
+      - inside the storage module, let's create two services: `storage-local.service.ts` and `storage.production.ts` with a `readFile` and `writeFile` method
+    - the question now is, how can we decide which one of the services to use?
+    - let's leverage a `NODE_ENV` environment variable while properly typing it in an `environment.d.ts` typing file
+    - let's now try to access these newly created services from `ComedianService`
+      - to make that happen, we could inject both services into our module, then leverage the ConfigService to decide which one of those to use through a `storageService` private method.
+      - now we can test it with the two variables to see if it works as expected
+      - and it does, but introducing it to all of our modules, means that we will have to configure it for each vertical.
+      - this is too dirty, but we can leverage dynamic modules, to register the StorageModule with the appropriate service!
+      - Let's refactor this approach
+        - first of all, let's declare an abstract class StorageService that both of the previous services will implement
+        - in `StorageModule` class, let's define a `forRoot` static method, then move the module definition from the decorator, into the return of the newly created method
+        - now, to inject the proper service, we will declare a custom provider as an object.
+        - for that, first we need a `provider token` - `STORAGE_SERVICE` - which is essentially a string variable that we will use to reference the service where needed
+        - then, we will leverage a factory pattern to create the service based on the current environment.
+        - through the `inject` property, we will inject `configService`
+        - through the `useFactory` property, we will make use of the `configService` which will be available as parameter in the callback
+        - we extract a `nodeEnv` value and based on it, we return the proper service
+        - if there is no `NODE_ENV` set, we throw an error to make sure the app doesn't start without this critical environment variable
+        - we end by making the `StorageModule` global through the usage of `@Global` decorator - because we want the storage available to all modules
+        - now if we want to use it, we'll have to inject it in the `AppModule` and register it with the `forRoot` method.
+        - and then, in `ComedianService`, we can just consume the `StorageService` with the DI pattern established by Nest, meaning that the `StorageService` will be available in the constructor by appending the `@Inject(STORAGE_SERVICE)` decorator to the constructor variable.
