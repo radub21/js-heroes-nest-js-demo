@@ -47,9 +47,7 @@ revealOptions:
   }
 </style>
 
-# Reverse UNO: From Frontend to Backend with NestJS
-
-## A Frontend Developer's Journey into the World of Backend Development
+# I Love my Nest...JS
 
 ![Nest Logo](./assets/nest-logo.svg)
 
@@ -242,6 +240,6 @@ nest new . --strict
 
 <!-- .element: class="fragment" data-fragment-index="1" -->
 
-Note: Anyway, enough talking, let's get our hands dirty and try implementing a simple HTTP service to showcase some of Nest's functionalities. In whatever time we have left, I will try to showcase a couple of Nest's most used functionalities by creating an HTTP Rest API from scratch!
+Note: But enough talking, because in whatever time we have left, I will try to showcase a couple of Nest's most used functionalities by creating an HTTP Rest API from scratch!
 
 A few weeks ago I watched a documentary on George Carlin's life so I was thinking it would be nice to have a Comedian Library with ones of the most important jokes and the shows those jokes were used in. While I could have searched the internet for an app that would fit my needs, in the end, I am a Software Engineer - what could be so hard to make it by myself?
